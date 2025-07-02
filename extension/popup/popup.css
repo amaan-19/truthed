@@ -1,0 +1,46 @@
+body {
+    width: 300px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    padding: 16px;
+}
+
+h1 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+#status {
+    margin-bottom: 12px;
+    padding: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007cba;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #005a87;
+}
+
+#results {
+    margin-top: 12px;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    min-height: 20px;
+}

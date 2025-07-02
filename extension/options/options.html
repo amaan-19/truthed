@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<div class="container">
+  <h1>Truthed Settings</h1>
+  <div class="setting">
+    <label>
+      <input type="checkbox" id="auto-analyze">
+      Auto-analyze pages
+    </label>
+  </div>
+  <div class="setting">
+    <label>
+      Detection Sensitivity:
+      <select id="sensitivity">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+    </label>
+  </div>
+  <button id="save-btn">Save Settings</button>
+</div>
+<script src="options.js"></script>
+</body>
+</html>
