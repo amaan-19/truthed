@@ -77,4 +77,4 @@ Report issues via GitHub Issues or email amaanakhan523@gmail.com for other inqui
 
 ## License
 
-MIT
+Apache 2.0
