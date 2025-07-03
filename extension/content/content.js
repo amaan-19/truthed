@@ -28,11 +28,33 @@ function highlightSuspiciousContent() {
     }
 }
 
+function extractArticleContent() {
+    // Clone document to avoid modifying original page
+    const documentClone = document.cloneNode(true);
+    console.log('Cloned document. Creating reader now...');
+
+    // Extract article content
+    const reader = new Readability(documentClone);
+    const article = reader.parse();
+
+    return article;
+}
+
 // Run when page loads
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', highlightSuspiciousContent);
 } else {
     highlightSuspiciousContent();
+    const articleData = extractArticleContent();
+    if (articleData) {
+        console.log("Title:", articleData.title);
+        console.log("Text length:", articleData.length);
+        console.log("Author:", articleData.byline);
+        // This is what you'll send to your credibility analysis
+        console.log("Content:", articleData.textContent);
+    } else {
+        console.log("extractArticleContent() was not called.")
+    }
 }
 
 // Listen for messages from popup
