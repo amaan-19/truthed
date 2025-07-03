@@ -2,17 +2,23 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <title>Truthed Settings</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
 <div class="container">
   <h1>Truthed Settings</h1>
+
   <div class="setting">
     <label>
       <input type="checkbox" id="auto-analyze">
-      Auto-analyze pages
+      Automatically analyze pages
     </label>
+    <div class="setting-description">
+      When enabled, Truthed will automatically analyze pages as you browse and show credibility indicators.
+    </div>
   </div>
+
   <div class="setting">
     <label>
       Detection Sensitivity:
@@ -22,8 +28,24 @@
         <option value="high">High</option>
       </select>
     </label>
+    <div class="setting-description">
+      Higher sensitivity will flag more potential issues but may result in more false positives.
+    </div>
   </div>
+
   <button id="save-btn">Save Settings</button>
+
+  <div id="status" class="status"></div>
+
+  <div class="privacy-section" id="privacy-info">
+    <h3>Privacy Promise</h3>
+    <ul>
+      <li>All analysis happens locally in your browser</li>
+      <li>No browsing data is sent to external servers</li>
+      <li>No tracking or analytics</li>
+      <li>Your data stays private</li>
+    </ul>
+  </div>
 </div>
 <script src="options.js"></script>
 </body>

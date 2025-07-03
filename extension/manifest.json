@@ -1,17 +1,21 @@
 {
   "manifest_version": 3,
   "name": "Truthed - Misinformation Detector",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Privacy-first misinformation detection for everyday web browsing",
 
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "notifications",
+    "contextMenus",
+    "alarms"
   ],
 
   "host_permissions": [
-    "https://*/*"
+    "https://*/*",
+    "http://*/*"
   ],
 
   "background": {
@@ -20,8 +24,8 @@
 
   "content_scripts": [
     {
-      "matches": ["https://*/*"],
-      "js": ["readability.js","content/content.js"],
+      "matches": ["https://*/*", "http://*/*"],
+      "js": ["content/content.js"],
       "css": ["content/content.css"],
       "run_at": "document_idle"
     }
@@ -29,7 +33,7 @@
 
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Truthed",
+    "default_title": "Truthed - Analyze Page Credibility",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
@@ -43,5 +47,12 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }
