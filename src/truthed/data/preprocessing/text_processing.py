@@ -1,7 +1,8 @@
 """
-Text preprocessing utilities for the Truthed system.
+Text preprocessing utilities for the truthed system.
 Handles cleaning, normalization, and sentence segmentation.
 """
+
 import re
 from typing import List, Optional
 from dataclasses import dataclass
@@ -161,39 +162,5 @@ class TextProcessor:
         return True  # For now, let most sentences through
 
 
-# Test function to verify everything works
-def test_text_processor():
-    """Test the TextProcessor functionality"""
-    processor = TextProcessor()
-
-    test_text = """
-    <html><body>
-    <h1>Climate Change Study</h1>
-    <p>Scientists at Stanford University reported that global temperatures 
-    have risen by 1.1°C since 1880. This represents unprecedented warming.</p>
-
-    <p>Dr. Sarah Johnson said the findings are concerning. "We're seeing 
-    major changes," she explained. The study analyzed 15,000 weather stations.</p>
-    </body></html>
-    """
-
-    result = processor.preprocess_article(test_text)
-
-    print("Test Results:")
-    print(f"Original length: {len(test_text)}")
-    print(f"Cleaned length: {len(result.cleaned_text)}")
-    print(f"Word count: {result.word_count}")
-    print(f"Sentences: {len(result.sentences)}")
-    print(f"Paragraphs: {len(result.paragraphs)}")
-
-    print("\nSentences found:")
-    for i, sentence in enumerate(result.sentences, 1):
-        is_claim = processor.is_likely_claim_sentence(sentence)
-        marker = "🎯" if is_claim else "💬"
-        print(f"  {i}. {marker} {sentence}")
-
-    return result
-
-
 if __name__ == "__main__":
-    test_text_processor()
+    TextProcessor()

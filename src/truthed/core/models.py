@@ -1,5 +1,5 @@
 """
-Core data models and schemas for the Truthed system.
+Core data models and schemas for the truthed system.
 """
 from datetime import datetime
 from enum import Enum
