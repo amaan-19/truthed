@@ -1,23 +1,50 @@
 # Truthed Professional
 
+**⚠️ Work in Progress**: This project is currently in active development. Core components are being built and refined.
+
 A sophisticated misinformation detection system that analyzes online content for credibility and factual accuracy.
 
 ## 🎯 Project Overview
 
-Truthed Professional combines advanced NLP, fact verification, and source credibility analysis to provide educational explanations about content credibility. Rather than simple binary judgments, it offers detailed analysis of why content may be unreliable.
+Truthed Professional is being designed to combine advanced NLP, fact verification, and source credibility analysis to provide educational explanations about content credibility. Rather than simple binary judgments, it will offer detailed analysis of why content may be unreliable.
 
-### Core Capabilities
-- **Claim Extraction**: Identifies factual claims in articles using BERT-based NLP
-- **Source Analysis**: Evaluates domain credibility and bias indicators  
-- **Fact Verification**: Cross-references claims against authoritative sources
-- **Ensemble Scoring**: Combines multiple signals for overall credibility assessment
+### Planned Core Capabilities
+- **Claim Extraction**: Identify factual claims in articles using BERT-based NLP *(In Development)*
+- **Source Analysis**: Evaluate domain credibility and bias indicators *(Planned)*
+- **Fact Verification**: Cross-reference claims against authoritative sources *(Planned)*
+- **Ensemble Scoring**: Combine multiple signals for overall credibility assessment *(Planned)*
+
+## 🚧 Development Status
+
+**Current Phase**: Foundation Development (Phase 1: Months 1-3)
+
+### What's Complete ✅
+- Project architecture and structure
+- Core data models and schemas
+- Development environment setup
+- Docker containerization framework
+- Testing infrastructure
+- API foundation with FastAPI
+
+### In Active Development 🔄
+- Claim extraction pipeline
+- Data collection and preprocessing modules
+- Database schema implementation
+- Basic API endpoints
+
+### Planned Next 📋
+- Source credibility analysis system
+- Fact verification integration
+- Ensemble scoring algorithm
+- Production deployment pipeline
+- Comprehensive testing suite
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.9+
-- PostgreSQL 12+
-- Redis 6+
+- PostgreSQL 12+ (or Docker)
+- Redis 6+ (or Docker)
 - Git
 
 ### Development Setup
@@ -40,131 +67,123 @@ pre-commit install
 3. **Configure environment**:
 ```bash
 cp .env.example .env
-# Edit .env with your settings
+# Edit .env with your database and API settings
 ```
 
-4. **Setup database** (using Docker):
+4. **Setup services** (Docker recommended):
 ```bash
+# Start database and Redis
 docker-compose up -d postgres redis
+
+# Initialize database (when ready)
 python scripts/setup_database.py
 ```
 
-5. **Run tests**:
+5. **Run available tests**:
 ```bash
-pytest tests/ -v
+pytest tests/ -v --tb=short
 ```
 
 6. **Start development server**:
 ```bash
 make dev
-# Or: uvicorn src.truthed.api.main:app --reload
+# Or directly: uvicorn src.truthed.api.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+The API will be available at `http://localhost:8000` with interactive docs at `http://localhost:8000/docs`.
 
 ## 📁 Project Structure
 
 ```
 src/truthed/
-├── api/                 # FastAPI application
-├── core/               # Core data models and utilities
-├── data/               # Data collection and preprocessing
-├── database/           # Database models and repositories
-├── models/             # ML models and algorithms
-├── services/           # Business logic services
-└── utils/              # Helper utilities
+├── api/                 # FastAPI application (Basic structure)
+├── core/               # Core data models and utilities ✅
+├── data/               # Data collection and preprocessing (In Progress)
+├── database/           # Database models and repositories (Basic)
+├── models/             # ML models and algorithms (Framework only)
+├── services/           # Business logic services (Framework only)
+└── utils/              # Helper utilities (Basic)
 
-deployment/             # Docker and Kubernetes configs
-docs/                   # Documentation
-scripts/               # Utility scripts
-tests/                 # Test suites
+deployment/             # Docker and Kubernetes configs ✅
+docs/                   # Documentation (Partial)
+scripts/               # Utility scripts (Basic)
+tests/                 # Test framework ✅
 ```
 
-## 🛠️ Development Workflow
+## 🛠️ Development Commands
 
-### Running Tests
+### Available Commands
 ```bash
-make test           # All tests
-make test-unit      # Unit tests only
-make test-integration  # Integration tests only
+make install          # Install production dependencies
+make install-dev      # Install development dependencies
+make setup           # Complete development setup
+make test            # Run available tests
+make lint            # Code linting
+make format          # Auto-formatting
+make docker-build    # Build Docker containers
+make docker-up       # Start services
+make clean           # Clean build artifacts
 ```
 
-### Code Quality
+### Future Commands (Not Yet Implemented)
 ```bash
-make lint           # Linting
-make format         # Auto-formatting
+make collect-data    # Collect training data
+make train-models    # Train ML models  
+make evaluate        # Evaluate system performance
 ```
 
-### Database Operations
-```bash
-make db-migrate     # Run migrations
-make db-reset       # Reset database
-```
+## 🏗️ Planned Architecture
 
-### Data and Models
-```bash
-make collect-data   # Collect training data
-make train-models   # Train ML models
-make evaluate       # Evaluate system performance
-```
-
-## 🏗️ Architecture
-
-### System Flow
+### Intended System Flow
 ```
 Content Input → Claim Extraction → Source Analysis → Fact Verification → Ensemble Scoring → Credibility Report
 ```
 
-### Key Components
-- **Claim Extraction**: BERT-based pipeline for identifying factual claims
-- **Source Credibility**: Domain analysis with bias detection
-- **Fact Verification**: Integration with multiple knowledge sources
-- **Ensemble Model**: Weighted combination of all signals
+### Component Status
+- **API Layer**: Basic FastAPI setup ✅
+- **Data Models**: Core schemas defined ✅
+- **Claim Extraction**: BERT pipeline framework 🔄
+- **Source Credibility**: Database schema planned 📋
+- **Fact Verification**: API integration planned 📋
+- **Ensemble Model**: Algorithm design phase 📋
 
-## 📊 Performance Targets
+## 📊 Target Goals
 
+### Performance Targets (When Complete)
 - **Accuracy**: >70% on diverse test datasets
 - **Speed**: <3 seconds end-to-end analysis
 - **Precision**: >85% for claim extraction
 - **Reliability**: >99% API uptime
 
+### Development Milestones
+- **Milestone 1**: Basic claim extraction 
+- **Milestone 2**: Source analysis integration 
+- **Milestone 3**: Fact verification pipeline 
+- **Milestone 4**: End-to-end system testing 
+
+## 🧪 Testing
+
+Currently implemented:
+- Testing framework with pytest
+- Basic test structure
+- Continuous integration setup
+
+**Note**: Comprehensive test coverage will be implemented as components are completed.
+
+```bash
+pytest tests/ -v                # Run all tests
+pytest tests/unit/ -v          # Unit tests (limited)
+pytest tests/integration/ -v   # Integration tests (planned)
+```
+
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes following our coding standards
-4. Run tests and ensure they pass
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-### Development Standards
-- All code must pass tests and linting
-- Maintain >90% test coverage
-- Follow PEP 8 style guidelines
-- Include docstrings for all public functions
-- Update documentation for new features
-
-## 📈 Current Status
-
-**Phase 1**: Foundation Development (Months 1-3)
-- ✅ Project structure and architecture
-- 🔄 Claim extraction pipeline (In Progress)
-- ⏳ Source credibility analysis
-- ⏳ Fact verification integration
-- ⏳ Ensemble scoring system
+This project is not accepting any contributors at this time.
 
 ## 📄 License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+---
 
-For questions and support:
-- Check the [documentation](docs/)
-- Review [common issues](docs/troubleshooting.md)
-- Open an [issue](issues/) for bugs or feature requests
-
-## 🙏 Acknowledgments
-
-- Fact-checking organizations for methodology guidance
-- Open source NLP community for foundational models
-- Academic research community for misinformation detection approaches
+**Development Status**: Active development, architecture stable, core features in progress.
