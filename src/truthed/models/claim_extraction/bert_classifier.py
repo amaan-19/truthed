@@ -1,22 +1,32 @@
 """
-BERT-based claim classifier implementation
-File: src/truthed/models/claim_extraction/bert_classifier.py
+BERT classifier
 """
 
 import torch
 from transformers import (
-    DistilBertTokenizer,
-    DistilBertForSequenceClassification,
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
     pipeline
 )
 from typing import List, Dict, Any, Optional
 import logging
 from dataclasses import dataclass
-from pathlib import Path
 import re
+import numpy as np
 
 # Import our core models
-from truthed.core.models import ClaimType
+try:
+    from truthed.core.models import ClaimType
+except ImportError:
+    # Fallback if core models not available
+    from enum import Enum
+    class ClaimType(str, Enum):
+        STATISTICAL = "statistical"
+        CAUSAL = "causal"
+        TEMPORAL = "temporal"
+        IDENTITY = "identity"
+        EXISTENTIAL = "existential"
+        GENERAL_FACTUAL = "general_factual"
 
 logger = logging.getLogger(__name__)
 
@@ -29,229 +39,329 @@ class ClaimPrediction:
     confidence: float
     claim_type: Optional[ClaimType] = None
     reasoning: str = ""
+    verifiability_score: float = 0.0
 
 
 class BERTClaimClassifier:
     """
     BERT-based classifier for identifying factual claims in sentences.
 
-    This is the core ML component that determines if a sentence contains
-    a factual claim that can be verified.
+    FIXED VERSION: Properly handles confidence thresholds
     """
 
-    def __init__(self, model_name: str = "distilbert-base-uncased"):
-        """
-        Initialize the BERT classifier.
-
-        Args:
-            model_name: Name of the pre-trained model to use
-        """
+    def __init__(self, model_name: str = "facebook/bart-large-mnli", min_claim_confidence: float = 0.6):
+        """Initialize the BERT classifier."""
         self.model_name = model_name
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = None
-        self.model = None
         self.classifier_pipeline = None
         self.is_loaded = False
+        self.min_claim_confidence = min_claim_confidence  # Store the threshold
 
-        print(f"🤖 BERTClaimClassifier initialized")
-        print(f"   Model: {model_name}")
+        print(f"🤖 BERTClaimClassifier initializing...")
+        print(f"   Model: {self.model_name}")
         print(f"   Device: {self.device}")
+        print(f"   Min confidence threshold: {self.min_claim_confidence}")
 
-        # Load the model
         self._load_model()
 
+    def set_confidence_threshold(self, threshold: float):
+        """Update the confidence threshold"""
+        self.min_claim_confidence = threshold
+        print(f"🎯 Updated confidence threshold to: {threshold}")
+
     def _load_model(self):
-        """Load the pre-trained BERT model and tokenizer"""
+        """Load the pre-trained BERT model"""
         try:
-            print(f"📥 Loading {self.model_name}...")
+            print(f"📥 Loading model for zero-shot classification...")
 
-            # Load tokenizer
-            self.tokenizer = DistilBertTokenizer.from_pretrained(self.model_name)
-
-            # For now, we'll use a zero-shot classification approach
-            # Later, we can fine-tune on claim-specific data
+            # Use a model specifically good for zero-shot classification
             self.classifier_pipeline = pipeline(
                 "zero-shot-classification",
                 model=self.model_name,
-                device=0 if self.device.type == "cuda" else -1
+                device=0 if torch.cuda.is_available() else -1
             )
 
             self.is_loaded = True
             print(f"✅ Model loaded successfully")
 
         except Exception as e:
-            print(f"❌ Failed to load model: {e}")
-            print(f"💡 Falling back to rule-based classification")
+            print(f"❌ Failed to load BERT model: {e}")
+            print(f"💡 Falling back to rule-based classification only")
             self.is_loaded = False
 
     def predict_batch(self, sentences: List[str]) -> List[ClaimPrediction]:
-        """
-        Classify a batch of sentences as claims or non-claims.
-
-        Args:
-            sentences: List of sentences to classify
-
-        Returns:
-            List of ClaimPrediction objects with results
-        """
+        """Classify a batch of sentences as claims or non-claims."""
         if not sentences:
             return []
 
-        print(f"🔍 Classifying {len(sentences)} sentences...")
+        print(f"🔍 Analyzing {len(sentences)} sentences for factual claims...")
+        print(f"🎯 Using confidence threshold: {self.min_claim_confidence}")
 
         predictions = []
 
-        for sentence in sentences:
-            if self.is_loaded:
-                prediction = self._predict_with_bert(sentence)
+        for i, sentence in enumerate(sentences, 1):
+            # Quick pre-filter with rules
+            rule_result = self._quick_rule_filter(sentence)
+
+            if rule_result['skip_ml']:
+                # Use rule-based result
+                prediction = ClaimPrediction(
+                    sentence=sentence,
+                    is_claim=rule_result['is_claim'],
+                    confidence=rule_result['confidence'],
+                    claim_type=rule_result['claim_type'],
+                    reasoning=rule_result['reasoning'],
+                    verifiability_score=rule_result['verifiability']
+                )
             else:
-                prediction = self._predict_with_rules(sentence)
+                # Use BERT for borderline cases
+                if self.is_loaded:
+                    prediction = self._predict_with_bert(sentence)
+                else:
+                    prediction = self._predict_with_rules(sentence)
 
             predictions.append(prediction)
 
+            # Progress indicator for large batches
+            if len(sentences) > 10 and i % 5 == 0:
+                print(f"   Processed {i}/{len(sentences)} sentences...")
+
+        claims_found = sum(1 for p in predictions if p.is_claim)
+        print(f"📊 Analysis complete: {claims_found}/{len(predictions)} claims identified")
+
         return predictions
 
+    def _quick_rule_filter(self, sentence: str) -> Dict[str, Any]:
+        """Quick rule-based filter to skip obvious non-claims"""
+        sentence = sentence.strip()
+        sentence_lower = sentence.lower()
+
+        # Too short
+        if len(sentence) < 15:
+            return {
+                'skip_ml': True,
+                'is_claim': False,
+                'confidence': 0.95,
+                'claim_type': None,
+                'reasoning': 'Sentence too short for factual claim',
+                'verifiability': 0.0
+            }
+
+        # Questions
+        if sentence.endswith('?'):
+            return {
+                'skip_ml': True,
+                'is_claim': False,
+                'confidence': 0.9,
+                'claim_type': None,
+                'reasoning': 'Questions are not factual claims',
+                'verifiability': 0.0
+            }
+
+        # Clear subjective markers
+        subjective_indicators = [
+            'i think', 'i believe', 'i feel', 'in my opinion',
+            'personally', 'i would say', 'it seems to me'
+        ]
+
+        if any(indicator in sentence_lower for indicator in subjective_indicators):
+            return {
+                'skip_ml': True,
+                'is_claim': False,
+                'confidence': 0.85,
+                'claim_type': None,
+                'reasoning': 'Contains subjective opinion markers',
+                'verifiability': 0.1
+            }
+
+        # Strong factual indicators - definitely claims
+        strong_claim_patterns = [
+            r'\d+\.\d+%',  # Precise percentages
+            r'\$\d+\.?\d* (million|billion)',  # Large money amounts
+            r'\d+°[CF]',  # Temperature measurements
+            r'study (found|showed|revealed)',  # Research findings
+            r'according to.*study',  # Study citations
+            r'data (shows|indicates|reveals)',  # Data references
+        ]
+
+        for pattern in strong_claim_patterns:
+            if re.search(pattern, sentence_lower):
+                claim_type = self._classify_claim_type_rules(sentence)
+                return {
+                    'skip_ml': True,
+                    'is_claim': True,
+                    'confidence': 0.9,
+                    'claim_type': claim_type,
+                    'reasoning': f'Strong factual indicator: {pattern}',
+                    'verifiability': 0.8
+                }
+
+        # Let BERT decide for borderline cases
+        return {
+            'skip_ml': False,
+            'is_claim': False,
+            'confidence': 0.0,
+            'claim_type': None,
+            'reasoning': '',
+            'verifiability': 0.0
+        }
+
     def _predict_with_bert(self, sentence: str) -> ClaimPrediction:
-        """Use BERT for zero-shot classification"""
+        """Use BERT for nuanced classification"""
         try:
-            # Define candidate labels for zero-shot classification
+            # Define labels for claim vs non-claim classification
             candidate_labels = [
-                "factual claim that can be verified",
-                "opinion or subjective statement",
-                "question or instruction",
-                "general conversation"
+                "factual statement that can be verified",
+                "personal opinion or belief",
+                "general conversation or greeting",
+                "instruction or question"
             ]
 
-            # Run zero-shot classification
+            # Run classification
             result = self.classifier_pipeline(sentence, candidate_labels)
 
-            # Extract results
             top_label = result['labels'][0]
             confidence = result['scores'][0]
 
-            # Determine if it's a claim
-            is_claim = "factual claim" in top_label
+            # FIXED: Use the instance threshold, not hardcoded value
+            is_claim = "factual statement" in top_label and confidence > self.min_claim_confidence
 
-            # Classify claim type if it's a claim
+            # If it's a claim, classify the type
             claim_type = None
+            verifiability = 0.0
+
             if is_claim:
-                claim_type = self._classify_claim_type(sentence)
+                claim_type = self._classify_claim_type_rules(sentence)
+                verifiability = self._assess_verifiability(sentence)
+
+            reasoning = f"BERT: {top_label} (confidence: {confidence:.3f})"
 
             return ClaimPrediction(
                 sentence=sentence,
                 is_claim=is_claim,
                 confidence=confidence,
                 claim_type=claim_type,
-                reasoning=f"BERT classified as: {top_label}"
+                reasoning=reasoning,
+                verifiability_score=verifiability
             )
 
         except Exception as e:
-            logger.error(f"BERT prediction failed: {e}")
-            # Fallback to rule-based
+            logger.error(f"BERT prediction failed for: {sentence[:50]}... Error: {e}")
             return self._predict_with_rules(sentence)
 
     def _predict_with_rules(self, sentence: str) -> ClaimPrediction:
-        """Fallback rule-based classification"""
-
-        # Clean up the sentence
+        """Enhanced rule-based classification as fallback"""
         sentence = sentence.strip()
-        if len(sentence) < 10:
+        sentence_lower = sentence.lower()
+
+        if len(sentence) < 15:
             return ClaimPrediction(
                 sentence=sentence,
                 is_claim=False,
                 confidence=0.9,
-                reasoning="Too short to be a meaningful claim"
+                reasoning="Sentence too short for meaningful claim"
             )
 
-        # Rule-based indicators for factual claims
-        claim_indicators = {
-            'statistical': [
-                r'\d+%', r'\d+\.\d+%', r'\d+ percent',
-                r'\d+°[CF]', r'\d+ degrees',
-                r'\$\d+', r'\d+ million', r'\d+ billion',
-                r'\d+ times', r'increased by \d+', r'decreased by \d+'
-            ],
-            'temporal': [
-                r'\d{4}', r'last year', r'this year', r'next year',
-                r'yesterday', r'today', r'tomorrow',
-                r'in \d{4}', r'since \d{4}', r'by \d{4}'
-            ],
-            'causal': [
-                r'caused by', r'leads to', r'results in',
-                r'due to', r'because of', r'as a result'
-            ],
-            'identity': [
-                r'is the', r'was the', r'will be the',
-                r'are the', r'were the'
-            ],
-            'research': [
-                r'study found', r'research shows', r'scientists discovered',
-                r'according to', r'report says', r'data shows'
-            ]
-        }
-
-        # Check for claim indicators
-        sentence_lower = sentence.lower()
-        confidence = 0.0
-        claim_type = None
+        # Calculate claim score based on multiple indicators
+        claim_score = 0.0
         reasons = []
 
-        for ctype, patterns in claim_indicators.items():
-            for pattern in patterns:
-                if re.search(pattern, sentence_lower):
-                    confidence += 0.2
-                    if claim_type is None:
-                        claim_type = ClaimType(ctype) if ctype in [ct.value for ct in
-                                                                   ClaimType] else ClaimType.GENERAL_FACTUAL
-                    reasons.append(f"Found {ctype} indicator: {pattern}")
+        # Statistical indicators (+++)
+        statistical_patterns = [
+            r'\d+%', r'\d+\.\d+%', r'\d+ percent',
+            r'\$\d+', r'\d+ million', r'\d+ billion',
+            r'increased by \d+', r'decreased by \d+',
+            r'\d+ times (more|less|higher|lower)'
+        ]
 
-        # Additional heuristics
-        if any(word in sentence_lower for word in ['study', 'research', 'found', 'discovered']):
-            confidence += 0.15
-            reasons.append("Contains research language")
+        for pattern in statistical_patterns:
+            if re.search(pattern, sentence_lower):
+                claim_score += 0.3
+                reasons.append(f"Statistical data: {pattern}")
+                break
 
-        if re.search(r'[A-Z][a-z]+ (University|Institute|College)', sentence):
-            confidence += 0.1
-            reasons.append("Contains institutional reference")
+        # Research/authority indicators (++)
+        authority_patterns = [
+            r'(study|research|report) (found|shows|indicates)',
+            r'according to (scientists|researchers|experts)',
+            r'(university|institute) (published|released)',
+            r'(dr\.|professor) .+ (said|stated|reported)'
+        ]
 
-        if any(char.isdigit() for char in sentence):
-            confidence += 0.1
-            reasons.append("Contains numbers")
+        for pattern in authority_patterns:
+            if re.search(pattern, sentence_lower):
+                claim_score += 0.25
+                reasons.append(f"Authority reference: {pattern}")
+                break
 
-        # Penalty for subjective language
-        subjective_words = ['think', 'believe', 'feel', 'opinion', 'probably', 'maybe', 'perhaps']
-        if any(word in sentence_lower for word in subjective_words):
-            confidence -= 0.3
-            reasons.append("Contains subjective language")
+        # Temporal specificity (+)
+        temporal_patterns = [
+            r'\d{4}', r'(last|this|next) (year|month|week)',
+            r'(yesterday|today|tomorrow)',
+            r'in (january|february|march|april|may|june|july|august|september|october|november|december)',
+            r'since \d{4}', r'by \d{4}'
+        ]
 
-        # Penalty for questions
+        for pattern in temporal_patterns:
+            if re.search(pattern, sentence_lower):
+                claim_score += 0.15
+                reasons.append(f"Temporal specificity: {pattern}")
+                break
+
+        # Entity names (+)
+        if re.search(r'\b[A-Z][a-z]+ (University|Institute|Organization|Company|Corporation)\b', sentence):
+            claim_score += 0.1
+            reasons.append("Named institution")
+
+        # Geographic specificity (+)
+        if re.search(r'\b[A-Z][a-z]+, [A-Z][A-Z]\b|\b[A-Z][a-z]+ (County|State|Country)\b', sentence):
+            claim_score += 0.1
+            reasons.append("Geographic specificity")
+
+        # Penalty for subjective language (--)
+        subjective_words = ['think', 'believe', 'feel', 'opinion', 'probably', 'maybe', 'perhaps', 'seem']
+        subjective_count = sum(1 for word in subjective_words if word in sentence_lower)
+        if subjective_count > 0:
+            claim_score -= 0.3 * subjective_count
+            reasons.append(f"Subjective language ({subjective_count} indicators)")
+
+        # Penalty for questions (-)
         if sentence.strip().endswith('?'):
-            confidence -= 0.2
-            reasons.append("Is a question")
+            claim_score -= 0.4
+            reasons.append("Question format")
 
-        # Normalize confidence
-        confidence = max(0.0, min(1.0, confidence))
-        is_claim = confidence > 0.5
+        # Normalize score
+        confidence = max(0.0, min(1.0, claim_score))
 
-        if not is_claim:
-            claim_type = None
-        elif claim_type is None:
-            claim_type = ClaimType.GENERAL_FACTUAL
+        # FIXED: Use the instance threshold
+        is_claim = confidence > self.min_claim_confidence
+
+        # Determine claim type
+        claim_type = None
+        verifiability = 0.0
+
+        if is_claim:
+            claim_type = self._classify_claim_type_rules(sentence)
+            verifiability = self._assess_verifiability(sentence)
+
+        reasoning = f"Rule-based analysis: {'; '.join(reasons) if reasons else 'No strong indicators'}"
 
         return ClaimPrediction(
             sentence=sentence,
             is_claim=is_claim,
             confidence=confidence,
             claim_type=claim_type,
-            reasoning=f"Rule-based: {'; '.join(reasons) if reasons else 'No strong indicators'}"
+            reasoning=reasoning,
+            verifiability_score=verifiability
         )
 
-    def _classify_claim_type(self, sentence: str) -> ClaimType:
-        """Classify the type of claim"""
+    def _classify_claim_type_rules(self, sentence: str) -> ClaimType:
+        """Classify the type of claim using rules"""
         sentence_lower = sentence.lower()
 
         # Statistical claims
-        if re.search(r'\d+%|\d+\.\d+%|\d+ percent|increased by|decreased by', sentence_lower):
+        if re.search(r'\d+%|\d+\.\d+%|\d+ percent|increased by|decreased by|\$\d+', sentence_lower):
             return ClaimType.STATISTICAL
 
         # Temporal claims
@@ -259,73 +369,75 @@ class BERTClaimClassifier:
             return ClaimType.TEMPORAL
 
         # Causal claims
-        if re.search(r'caused|leads to|results in|due to|because|as a result', sentence_lower):
+        if re.search(r'caused|leads to|results in|due to|because|as a result|triggers', sentence_lower):
             return ClaimType.CAUSAL
 
         # Identity claims
-        if re.search(r'is the|was the|are the|were the', sentence_lower):
+        if re.search(r'is the|was the|are the|were the|identified as|named as', sentence_lower):
             return ClaimType.IDENTITY
 
         # Existential claims
-        if re.search(r'exists|there is|there are|discovered|found', sentence_lower):
+        if re.search(r'exists|there is|there are|discovered|found|detected', sentence_lower):
             return ClaimType.EXISTENTIAL
 
         return ClaimType.GENERAL_FACTUAL
 
+    def _assess_verifiability(self, sentence: str) -> float:
+        """Assess how verifiable a claim is (0.0 to 1.0)"""
+        sentence_lower = sentence.lower()
+        verifiability = 0.5  # Base score
+
+        # High verifiability indicators
+        if re.search(r'study|research|data|statistics|according to', sentence_lower):
+            verifiability += 0.3
+
+        if re.search(r'\d+%|\$\d+|\d+ degrees|measured|recorded', sentence_lower):
+            verifiability += 0.2
+
+        if re.search(r'published|reported|official|government', sentence_lower):
+            verifiability += 0.2
+
+        # Low verifiability indicators
+        if re.search(r'will|might|could|probably|estimated|predicted', sentence_lower):
+            verifiability -= 0.2
+
+        if re.search(r'secret|classified|rumored|alleged', sentence_lower):
+            verifiability -= 0.3
+
+        return max(0.0, min(1.0, verifiability))
+
 
 # Test function
-def test_bert_classifier():
-    """Test the BERT classifier with sample sentences"""
-    print("🧪 Testing BERTClaimClassifier")
-    print("=" * 50)
+def test_claim_classifier_fixed():
+    """Test the fixed BERT classifier"""
+    print("🧪 Testing FIXED BERTClaimClassifier")
+    print("=" * 60)
 
-    classifier = BERTClaimClassifier()
+    # Test with different thresholds
+    thresholds = [0.4, 0.5, 0.6]
 
     test_sentences = [
-        # Clear factual claims
-        "Global temperatures have risen by 1.1°C since 1880.",
-        "The study analyzed data from 15,000 weather stations.",
-        "Stanford University published the research yesterday.",
-
-        # Statistical claims
-        "COVID-19 cases increased by 25% last week.",
-        "The company's revenue grew to $50 million in 2023.",
-
-        # Opinions/subjective
-        "I think climate change is a serious problem.",
-        "This movie is really good.",
-        "We should do something about pollution.",
-
-        # Questions
-        "What causes climate change?",
-        "How many people live in New York?",
-
-        # Mixed/borderline
-        "Climate change is real.",
-        "The weather is getting warmer.",
+        "Scientists at MIT announced a breakthrough in renewable energy.",
+        "The new solar panels achieve 47% efficiency, compared to 22% for current technology.",
+        "The research team tested 500 prototypes over 18 months.",
+        "Dr. Smith believes this could reduce energy costs by 60%.",
+        "Apple Inc. reported revenue of $365 billion in fiscal year 2021."
     ]
 
-    predictions = classifier.predict_batch(test_sentences)
+    for threshold in thresholds:
+        print(f"\n🎯 Testing with threshold: {threshold}")
+        print("-" * 40)
 
-    print(f"\n📊 CLASSIFICATION RESULTS:")
-    print("-" * 80)
+        classifier = BERTClaimClassifier(min_claim_confidence=threshold)
+        predictions = classifier.predict_batch(test_sentences)
 
-    for pred in predictions:
-        claim_indicator = "🎯" if pred.is_claim else "💬"
-        type_str = f"[{pred.claim_type.value}]" if pred.claim_type else "[non-claim]"
+        claims_found = sum(1 for p in predictions if p.is_claim)
+        print(f"Claims detected: {claims_found}/{len(predictions)}")
 
-        print(f"{claim_indicator} {pred.confidence:.2f} {type_str}")
-        print(f"   \"{pred.sentence}\"")
-        print(f"   Reasoning: {pred.reasoning}")
-        print()
-
-    # Summary
-    claims_found = sum(1 for p in predictions if p.is_claim)
-    print(f"📈 SUMMARY:")
-    print(f"   Total sentences: {len(predictions)}")
-    print(f"   Claims identified: {claims_found}")
-    print(f"   Non-claims: {len(predictions) - claims_found}")
+        for i, pred in enumerate(predictions, 1):
+            marker = "🎯" if pred.is_claim else "💬"
+            print(f"  {i}. {marker} {pred.confidence:.3f} - {pred.sentence[:50]}...")
 
 
 if __name__ == "__main__":
-    test_bert_classifier()
+    test_claim_classifier_fixed()
