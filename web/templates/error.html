@@ -1,0 +1,45 @@
+<!-- templates/error.html -->
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code or 500 }} - Truthed Professional{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; max-width: 600px; margin: 2rem auto;">
+    <div style="color: var(--danger-color); font-size: 4rem; margin-bottom: 1rem;">
+        {% if error_code == 404 %}
+            🔍
+        {% elif error_code == 500 %}
+            ⚙️
+        {% else %}
+            ⚠️
+        {% endif %}
+    </div>
+
+    <h2 style="color: var(--gray-900); margin-bottom: 1rem;">
+        {{ error_message or "Something went wrong" }}
+    </h2>
+
+    <p style="color: var(--gray-600); font-size: 1.125rem; margin-bottom: 2rem; line-height: 1.6;">
+        {{ error_description or "We're sorry, but something unexpected happened. Please try again." }}
+    </p>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="/" class="btn btn-primary">🏠 Go Home</a>
+        <button onclick="history.back()" class="btn btn-secondary">← Go Back</button>
+        <button onclick="location.reload()" class="btn btn-secondary">🔄 Refresh Page</button>
+    </div>
+</div>
+
+<!-- Debug Information (only in development) -->
+{% if config.DEBUG %}
+<div class="card" style="max-width: 800px; margin: 2rem auto;">
+    <h3 style="color: var(--danger-color); margin-bottom: 1rem;">🐛 Debug Information</h3>
+    <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.875rem;">
+        <p><strong>Error Code:</strong> {{ error_code or "Unknown" }}</p>
+        <p><strong>URL:</strong> {{ request.url if request else "Unknown" }}</p>
+        <p><strong>Method:</strong> {{ request.method if request else "Unknown" }}</p>
+        <p><strong>Timestamp:</strong> {{ moment().format('YYYY-MM-DD HH:mm:ss') if moment else "Unknown" }}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

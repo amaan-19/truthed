@@ -1,0 +1,68 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Truthed Professional - Content Verification{% endblock %}</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    <!-- Favicon (optional) -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Page-specific styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>Truthed Professional</h1>
+                    <div class="subtitle">Academic Content Verification Platform</div>
+                </div>
+                <nav class="nav">
+                    <a href="/" {% if request.endpoint == 'index' %}class="active"{% endif %}>Analyze</a>
+                    <a href="/demo" {% if request.endpoint == 'demo' %}class="active"{% endif %}>Demo Examples</a>
+                    <a href="/methodology" {% if request.endpoint == 'methodology' %}class="active"{% endif %}>How It Works</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Truthed Professional. Built for academic research and professional journalism.</p>
+        </div>
+    </footer>
+
+    <!-- Page-specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+
+    <script>
+        // Global JavaScript functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form enhancement for loading states
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.classList.add('loading');
+                        submitBtn.innerHTML = '<span class="spinner"></span> Processing...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

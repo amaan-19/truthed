@@ -1,0 +1,191 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Content Analysis - Truthed Professional{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="card">
+    <div class="hero-section">
+        <h2 class="hero-title">
+            Professional Content Verification
+        </h2>
+        <p class="hero-description">
+            Analyze articles, news content, and research papers for factual claims, source credibility,
+            and verification opportunities. Built for academic research and professional journalism.
+        </p>
+    </div>
+
+    <!-- Pipeline Status Alert -->
+    {% if not pipeline_available %}
+    <div class="alert alert-warning">
+        <strong>⚠️ Demo Mode Active:</strong> Full analysis pipeline is not available.
+        Results will be simulated for demonstration purposes. This showcases the interface and workflow.
+    </div>
+    {% else %}
+    <div class="alert alert-success">
+        <strong>✅ Full Pipeline Active:</strong> Complete claim extraction and verification analysis available.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Analysis Form -->
+<div class="card">
+    <h3>Submit Content for Analysis</h3>
+
+    <form method="POST" action="/analyze" id="analysisForm">
+        <!-- Article Title -->
+        <div class="form-group">
+            <label for="title">
+                <span class="form-label-with-icon">
+                    📰 Article Title
+                    <span style="color: var(--gray-500); font-weight: normal; font-size: 0.75rem;">(optional)</span>
+                </span>
+            </label>
+            <input type="text"
+                   name="title"
+                   id="title"
+                   placeholder="e.g., New Climate Research Shows Unprecedented Warming">
+            <div class="form-hint">
+                Helps with context and source analysis
+            </div>
+        </div>
+
+        <!-- Source URL -->
+        <div class="form-group">
+            <label for="url">
+                <span class="form-label-with-icon">
+                    🔗 Source URL
+                    <span style="color: var(--gray-500); font-weight: normal; font-size: 0.75rem;">(optional)</span>
+                </span>
+            </label>
+            <input type="url"
+                   name="url"
+                   id="url"
+                   placeholder="https://example.com/article">
+            <div class="form-hint">
+                Used for domain credibility assessment
+            </div>
+        </div>
+
+        <!-- Article Content -->
+        <div class="form-group">
+            <label for="content">
+                <span class="form-label-with-icon">
+                    📄 Article Content
+                    <span style="color: var(--danger-color); font-weight: normal; font-size: 0.75rem;">*required</span>
+                </span>
+            </label>
+            <textarea name="content"
+                      id="content"
+                      required
+                      placeholder="Paste the full article content here for comprehensive analysis...
+
+Example content types:
+• News articles and reports
+• Research paper abstracts
+• Blog posts and opinion pieces
+• Social media posts
+• Press releases
+
+The system will identify factual claims, assess verifiability, and check source credibility."
+                      style="font-family: ui-monospace, SFMono-Regular, 'SF Mono', monospace;">
+            </textarea>
+            <div class="form-hint">
+                Minimum 50 characters recommended for meaningful analysis
+            </div>
+        </div>
+
+        <!-- Analysis Options -->
+        <div class="analysis-options">
+            <h4>🔬 Analysis Focus</h4>
+            <div class="options-grid">
+                <label class="checkbox-label">
+                    <input type="checkbox" checked class="checkbox-input">
+                    <span>Factual claim extraction</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" checked class="checkbox-input">
+                    <span>Source credibility analysis</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" checked class="checkbox-input">
+                    <span>Verification assessment</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" checked class="checkbox-input">
+                    <span>Content quality scoring</span>
+                </label>
+            </div>
+            <div class="form-hint" style="margin-top: 0.75rem;">
+                All analysis types are included in the current version
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button type="submit" class="btn btn-primary" style="font-size: 1rem; padding: 0.875rem 2rem;">
+                🔍 Analyze Content
+            </button>
+            <a href="/demo" class="btn btn-secondary">
+                👀 View Demo Examples
+            </a>
+            <div class="timing-note">
+                Analysis typically takes 10-30 seconds
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Form validation and enhancement specific to index page
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('analysisForm');
+    const contentTextarea = document.getElementById('content');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    // Character counter for content
+    const charCounter = document.createElement('div');
+    charCounter.className = 'form-hint';
+    charCounter.style.textAlign = 'right';
+    charCounter.style.marginTop = '0.25rem';
+    contentTextarea.parentNode.appendChild(charCounter);
+
+    function updateCharCount() {
+        const count = contentTextarea.value.length;
+        charCounter.textContent = `${count} characters`;
+
+        if (count < 50) {
+            charCounter.style.color = 'var(--warning-color)';
+        } else {
+            charCounter.style.color = 'var(--gray-500)';
+        }
+    }
+
+    contentTextarea.addEventListener('input', updateCharCount);
+    updateCharCount();
+
+    // Form submission enhancement
+    form.addEventListener('submit', function(e) {
+        const content = contentTextarea.value.trim();
+
+        if (content.length < 20) {
+            e.preventDefault();
+            alert('Please provide at least 20 characters of content for meaningful analysis.');
+            contentTextarea.focus();
+            return;
+        }
+
+        // Show loading state
+        submitBtn.innerHTML = '<span class="spinner"></span> Analyzing Content...';
+        submitBtn.disabled = true;
+
+        // Scroll to top for better UX
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+</script>
+{% endblock %}

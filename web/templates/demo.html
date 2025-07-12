@@ -1,0 +1,251 @@
+<!-- templates/demo.html -->
+{% extends "base.html" %}
+
+{% block title %}Demo Examples - Truthed Professional{% endblock %}
+
+{% block content %}
+<!-- Demo Introduction -->
+<div class="card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--gray-900); margin-bottom: 1rem;">Content Analysis Demonstrations</h2>
+        <p style="color: var(--gray-600); font-size: 1.125rem; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+            Explore how Truthed Professional analyzes different types of content. These examples showcase
+            the system's ability to distinguish between high-quality, questionable, and problematic content.
+        </p>
+    </div>
+
+    <div style="background: var(--primary-light); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+        <h4 style="color: var(--primary-color); margin-bottom: 0.75rem;">🎓 For Academic Use</h4>
+        <p style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0;">
+            These examples are designed for educational purposes and demonstrate key credibility indicators
+            that students and researchers should recognize when evaluating online content.
+        </p>
+    </div>
+</div>
+
+<!-- Demo Examples Grid -->
+<div class="demo-grid">
+    {% for article in articles %}
+    <div class="demo-item">
+        <!-- Article Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <h3 style="color: var(--gray-900); margin-bottom: 0.5rem;">{{ article.title }}</h3>
+                <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 0.75rem;">
+                    <strong>Source:</strong> {{ article.url }}
+                </div>
+            </div>
+            <div style="text-align: center; margin-left: 1rem;">
+                <div style="background: {% if article.expected_score >= 75 %}var(--success-light){% elif article.expected_score >= 50 %}var(--warning-light){% else %}var(--danger-light){% endif %};
+                           color: {% if article.expected_score >= 75 %}var(--success-color){% elif article.expected_score >= 50 %}var(--warning-color){% else %}var(--danger-color){% endif %};
+                           padding: 0.5rem; border-radius: 8px; font-weight: 700; min-width: 60px;">
+                    {{ article.expected_score }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">Expected Score</div>
+            </div>
+        </div>
+
+        <!-- Content Preview -->
+        <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 3px solid var(--gray-300);">
+            <div style="font-size: 0.875rem; line-height: 1.5; color: var(--gray-700);">
+                {{ article.content[:300] }}{% if article.content|length > 300 %}...{% endif %}
+            </div>
+        </div>
+
+        <!-- Analysis Description -->
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="color: var(--gray-800); font-size: 1rem; margin-bottom: 0.5rem;">Why This Score?</h4>
+            <p style="font-size: 0.875rem; color: var(--gray-600); line-height: 1.4;">
+                {{ article.description }}
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <form method="POST" action="/analyze" style="flex: 1;">
+                <input type="hidden" name="title" value="{{ article.title }}">
+                <input type="hidden" name="url" value="{{ article.url }}">
+                <input type="hidden" name="content" value="{{ article.content }}">
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.875rem;">
+                    🔍 Analyze This Example
+                </button>
+            </form>
+            <button onclick="showContent({{ loop.index0 }})" class="btn btn-secondary" style="font-size: 0.875rem;">
+                👀 View Full Content
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Educational Notes -->
+<div class="card" style="margin-top: 2rem;">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">📚 Educational Insights</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- High Credibility Indicators -->
+        <div style="background: var(--success-light); padding: 1.5rem; border-radius: 8px; border: 1px solid #a7f3d0;">
+            <h4 style="color: var(--success-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>✅</span> High Credibility Indicators
+            </h4>
+            <ul style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Reputable, established sources (.edu, .gov, major news)</li>
+                <li>Specific, verifiable data and statistics</li>
+                <li>Named researchers and institutions</li>
+                <li>Peer-reviewed publications</li>
+                <li>Transparent methodology</li>
+                <li>Balanced, objective language</li>
+            </ul>
+        </div>
+
+        <!-- Red Flags -->
+        <div style="background: var(--danger-light); padding: 1.5rem; border-radius: 8px; border: 1px solid #fca5a5;">
+            <h4 style="color: var(--danger-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>⚠️</span> Credibility Red Flags
+            </h4>
+            <ul style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Extreme or sensationalized language</li>
+                <li>Unverified or extraordinary claims</li>
+                <li>Lack of credible sources or citations</li>
+                <li>Anonymous or questionable authors</li>
+                <li>Emotional manipulation tactics</li>
+                <li>Conspiracy theories or pseudoscience</li>
+            </ul>
+        </div>
+
+        <!-- Mixed Signals -->
+        <div style="background: var(--warning-light); padding: 1.5rem; border-radius: 8px; border: 1px solid #fde68a;">
+            <h4 style="color: var(--warning-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>⚡</span> Mixed Credibility Signals
+            </h4>
+            <ul style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Moderate sources with editorial bias</li>
+                <li>Opinion pieces mixed with factual claims</li>
+                <li>Partially verifiable information</li>
+                <li>Outdated or incomplete data</li>
+                <li>Missing context or nuance</li>
+                <li>Commercial or promotional content</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Usage Instructions -->
+<div class="card">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">🎯 How to Use These Examples</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+        <div>
+            <h4 style="color: var(--primary-color); font-size: 1rem; margin-bottom: 0.75rem;">👨‍🏫 For Educators</h4>
+            <ul style="font-size: 0.875rem; color: var(--gray-600); line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Use examples to teach credibility assessment</li>
+                <li>Discuss scoring methodology with students</li>
+                <li>Compare different content types and sources</li>
+                <li>Demonstrate fact-checking principles</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="color: var(--success-color); font-size: 1rem; margin-bottom: 0.75rem;">🎓 For Students</h4>
+            <ul style="font-size: 0.875rem; color: var(--gray-600); line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Practice identifying credibility indicators</li>
+                <li>Learn to analyze source quality</li>
+                <li>Understand verification processes</li>
+                <li>Develop critical thinking skills</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="color: var(--warning-color); font-size: 1rem; margin-bottom: 0.75rem;">🔬 For Researchers</h4>
+            <ul style="font-size: 0.875rem; color: var(--gray-600); line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li>Validate system performance on known content</li>
+                <li>Test different content categories</li>
+                <li>Analyze scoring methodology</li>
+                <li>Compare with other verification tools</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="card" style="text-align: center; background: linear-gradient(135deg, var(--primary-light), var(--gray-50));">
+    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Ready to Analyze Your Own Content?</h3>
+    <p style="color: var(--gray-600); margin-bottom: 1.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+        Try the full content analysis system with your own articles, research papers, or online content.
+    </p>
+    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+        <a href="/" class="btn btn-primary">📝 Analyze New Content</a>
+        <a href="/methodology" class="btn btn-secondary">🔬 Learn About the Methodology</a>
+    </div>
+</div>
+
+<!-- Content Modal (Hidden by default) -->
+<div id="contentModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 2rem;">
+    <div style="background: white; max-width: 800px; margin: 0 auto; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 id="modalTitle" style="color: var(--gray-900); margin: 0;"></h3>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-500);">×</button>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <strong style="color: var(--gray-700);">Source:</strong>
+                <span id="modalUrl" style="color: var(--primary-color);"></span>
+            </div>
+            <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px; font-family: Georgia, serif; line-height: 1.7;">
+                <div id="modalContent"></div>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: center;">
+                <form id="modalAnalyzeForm" method="POST" action="/analyze" style="display: inline;">
+                    <input type="hidden" id="modalAnalyzeTitle" name="title">
+                    <input type="hidden" id="modalAnalyzeUrl" name="url">
+                    <input type="hidden" id="modalAnalyzeContent" name="content">
+                    <button type="submit" class="btn btn-primary">🔍 Analyze This Content</button>
+                </form>
+                <button onclick="closeModal()" class="btn btn-secondary" style="margin-left: 1rem;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Demo content data
+const demoArticles = {{ articles | tojson }};
+
+function showContent(index) {
+    const article = demoArticles[index];
+
+    document.getElementById('modalTitle').textContent = article.title;
+    document.getElementById('modalUrl').textContent = article.url;
+    document.getElementById('modalContent').innerHTML = article.content.replace(/\n\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>');
+
+    // Set form data
+    document.getElementById('modalAnalyzeTitle').value = article.title;
+    document.getElementById('modalAnalyzeUrl').value = article.url;
+    document.getElementById('modalAnalyzeContent').value = article.content;
+
+    document.getElementById('contentModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('contentModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+
+// Close modal when clicking outside
+document.getElementById('contentModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

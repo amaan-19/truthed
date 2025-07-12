@@ -412,10 +412,23 @@ package-lock.json
 yarn.lock
 
 # Frontend build (if adding web interface later)
-static/dist/
-static/build/
+web/static/dist/
+web/static/build/
 
 # Local development databases
 dev.db
 test.db
 local.db
+
+# Web Interface
+web/instance/
+web/*.db
+web/*.sqlite
+
+# Flask
+.flaskenv
+
+# Web assets
+web/static/uploads/
+web/static/generated/
+

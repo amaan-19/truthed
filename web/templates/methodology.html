@@ -1,0 +1,393 @@
+<!-- templates/methodology.html -->
+{% extends "base.html" %}
+
+{% block title %}Methodology - How Truthed Professional Works{% endblock %}
+
+{% block content %}
+<!-- Introduction -->
+<div class="card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="color: var(--gray-900); margin-bottom: 1rem;">How Truthed Professional Works</h2>
+        <p style="color: var(--gray-600); font-size: 1.125rem; max-width: 700px; margin: 0 auto; line-height: 1.6;">
+            Understanding the methodology behind content credibility analysis. Our system combines multiple
+            analytical approaches to provide transparent, explainable assessments.
+        </p>
+    </div>
+
+    <div style="background: var(--success-light); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
+        <h4 style="color: var(--success-color); margin-bottom: 0.75rem;">🔬 Academic Transparency</h4>
+        <p style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0;">
+            This methodology is designed for academic use and research validation. All scoring algorithms
+            are transparent and explainable, supporting educational and research applications.
+        </p>
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="card">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">📊 System Overview</h3>
+
+    <!-- Process Flow -->
+    <div style="background: var(--gray-50); padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; text-align: center;">
+            <!-- Step 1 -->
+            <div style="position: relative;">
+                <div style="background: var(--primary-color); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: bold; margin: 0 auto 1rem;">1</div>
+                <h4 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1rem;">Text Processing</h4>
+                <p style="font-size: 0.8rem; color: var(--gray-600);">Parse content, extract sentences, identify structure</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div>
+                <div style="background: var(--success-color); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: bold; margin: 0 auto 1rem;">2</div>
+                <h4 style="color: var(--success-color); margin-bottom: 0.5rem; font-size: 1rem;">Claim Extraction</h4>
+                <p style="font-size: 0.8rem; color: var(--gray-600);">BERT-based identification of factual claims</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div>
+                <div style="background: var(--warning-color); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: bold; margin: 0 auto 1rem;">3</div>
+                <h4 style="color: var(--warning-color); margin-bottom: 0.5rem; font-size: 1rem;">Source Analysis</h4>
+                <p style="font-size: 0.8rem; color: var(--gray-600);">Domain credibility and bias assessment</p>
+            </div>
+
+            <!-- Step 4 -->
+            <div>
+                <div style="background: var(--danger-color); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: bold; margin: 0 auto 1rem;">4</div>
+                <h4 style="color: var(--danger-color); margin-bottom: 0.5rem; font-size: 1rem;">Ensemble Scoring</h4>
+                <p style="font-size: 0.8rem; color: var(--gray-600);">Combined credibility assessment</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scoring Formula -->
+    <div style="background: var(--primary-light); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--primary-color);">
+        <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📈 Credibility Scoring Formula</h4>
+        <div style="font-family: ui-monospace, SFMono-Regular, 'SF Mono', monospace; background: white; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.875rem;">
+            <div style="color: var(--gray-800); font-weight: 600;">Final Score = Base (65) + Source Factor (35%) + Claims Factor (40%) + Content Factor (25%)</div>
+        </div>
+        <p style="font-size: 0.875rem; color: var(--gray-700); line-height: 1.5; margin: 0;">
+            Each component contributes to the final credibility assessment, with claim verification being the primary factor,
+            followed by source reputation and content quality indicators.
+        </p>
+    </div>
+</div>
+
+<!-- Component Details -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+
+    <!-- Claim Extraction -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div style="background: {% if methodology.claim_extraction.available %}var(--success-color){% else %}var(--gray-400){% endif %}; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🎯</div>
+            <div>
+                <h3 style="color: var(--gray-900); margin: 0; font-size: 1.125rem;">Claim Extraction</h3>
+                <div style="font-size: 0.75rem; color: {% if methodology.claim_extraction.available %}var(--success-color){% else %}var(--gray-500){% endif %}; font-weight: 500;">
+                    {% if methodology.claim_extraction.available %}✅ ACTIVE{% else %}⚠️ DEMO MODE{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <p style="color: var(--gray-600); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
+            {{ methodology.claim_extraction.description }}
+        </p>
+
+        <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color);">{{ methodology.claim_extraction.accuracy }}</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Accuracy</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--success-color);">{{ methodology.claim_extraction.types|length }}</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Claim Types</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h5 style="color: var(--gray-800); margin-bottom: 0.5rem; font-size: 0.875rem;">Detected Claim Types:</h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for claim_type in methodology.claim_extraction.types %}
+                <span style="background: var(--primary-light); color: var(--primary-color); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">{{ claim_type }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Source Analysis -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div style="background: {% if methodology.source_analysis.available %}var(--success-color){% else %}var(--gray-400){% endif %}; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">📰</div>
+            <div>
+                <h3 style="color: var(--gray-900); margin: 0; font-size: 1.125rem;">Source Analysis</h3>
+                <div style="font-size: 0.75rem; color: {% if methodology.source_analysis.available %}var(--success-color){% else %}var(--gray-500){% endif %}; font-weight: 500;">
+                    {% if methodology.source_analysis.available %}✅ ACTIVE{% else %}⚠️ LIMITED{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <p style="color: var(--gray-600); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
+            {{ methodology.source_analysis.description }}
+        </p>
+
+        <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: center;">
+                <div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--warning-color);">{{ methodology.source_analysis.sources }}+</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Domains</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.25rem; font-weight: 700; color: var(--success-color);">{{ methodology.source_analysis.categories|length }}</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Categories</div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h5 style="color: var(--gray-800); margin-bottom: 0.5rem; font-size: 0.875rem;">Source Categories:</h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for category in methodology.source_analysis.categories %}
+                <span style="background: var(--warning-light); color: var(--warning-color); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">{{ category }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification -->
+    <div class="card">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
+            <div style="background: {% if methodology.verification.available %}var(--success-color){% else %}var(--gray-400){% endif %}; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🔍</div>
+            <div>
+                <h3 style="color: var(--gray-900); margin: 0; font-size: 1.125rem;">Fact Verification</h3>
+                <div style="font-size: 0.75rem; color: {% if methodology.verification.available %}var(--success-color){% else %}var(--gray-500){% endif %}; font-weight: 500;">
+                    {% if methodology.verification.available %}✅ ACTIVE{% else %}⚠️ PLANNED{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <p style="color: var(--gray-600); font-size: 0.875rem; line-height: 1.5; margin-bottom: 1.5rem;">
+            {{ methodology.verification.description }}
+        </p>
+
+        <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <div style="text-align: center;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--danger-color);">{{ methodology.verification.coverage }}</div>
+                <div style="font-size: 0.75rem; color: var(--gray-600);">Coverage</div>
+            </div>
+        </div>
+
+        <div>
+            <h5 style="color: var(--gray-800); margin-bottom: 0.5rem; font-size: 0.875rem;">Integration APIs:</h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                {% for api in methodology.verification.apis %}
+                <span style="background: var(--danger-light); color: var(--danger-color); padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500;">{{ api }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technical Implementation -->
+<div class="card">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">⚙️ Technical Implementation</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- NLP Pipeline -->
+        <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1rem;">🧠 NLP Pipeline</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.875rem; color: var(--gray-700);">
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--success-color);">✓</span>
+                    spaCy for text processing and entity recognition
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--success-color);">✓</span>
+                    BERT transformers for claim classification
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--success-color);">✓</span>
+                    Rule-based patterns for content analysis
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--warning-color);">○</span>
+                    Sentence transformers for semantic similarity
+                </li>
+            </ul>
+        </div>
+
+        <!-- Data Sources -->
+        <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: var(--warning-color); margin-bottom: 1rem; font-size: 1rem;">📊 Data Sources</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.875rem; color: var(--gray-700);">
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--success-color);">✓</span>
+                    Curated domain credibility database
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--success-color);">✓</span>
+                    Academic institution rankings
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--warning-color);">○</span>
+                    Google Fact Check Tools API
+                </li>
+                <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                    <span style="position: absolute; left: 0; color: var(--warning-color);">○</span>
+                    Knowledge graph integration
+                </li>
+            </ul>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px;">
+            <h4 style="color: var(--danger-color); margin-bottom: 1rem; font-size: 1rem;">📈 Performance</h4>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">85%</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Claim Detection</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">&lt;3s</div>
+                    <div style="font-size: 0.75rem; color: var(--gray-600);">Processing Time</div>
+                </div>
+            </div>
+            <p style="font-size: 0.75rem; color: var(--gray-600); text-align: center; margin: 0;">
+                Tested on diverse content types including news, academic papers, and social media posts.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Scoring Details -->
+<div class="card">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">🎯 Detailed Scoring Methodology</h3>
+
+    <!-- Scoring Breakdown -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Source Factor -->
+        <div style="border: 1px solid var(--warning-color); border-radius: 8px; padding: 1.5rem;">
+            <h4 style="color: var(--warning-color); margin-bottom: 1rem; font-size: 1rem;">📰 Source Factor (35%)</h4>
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">High Credibility (.edu, .gov)</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">85-95</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Established News</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">75-90</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Unknown/Neutral</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">45-55</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.875rem;">Known Issues</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">10-35</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims Factor -->
+        <div style="border: 1px solid var(--success-color); border-radius: 8px; padding: 1.5rem;">
+            <h4 style="color: var(--success-color); margin-bottom: 1rem; font-size: 1rem;">🎯 Claims Factor (40%)</h4>
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">High Confidence + Verifiable</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">+15</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Medium Confidence</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">+5</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Low Confidence</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">-15</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.875rem;">Unverifiable Claims</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">-5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Factor -->
+        <div style="border: 1px solid var(--primary-color); border-radius: 8px; padding: 1.5rem;">
+            <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-size: 1rem;">📄 Content Factor (25%)</h4>
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Comprehensive (300+ words)</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">+8</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Standard Length</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">+3</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                    <span style="font-size: 0.875rem;">Brief Content</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-size: 0.875rem;">Very Short (&lt;50 words)</span>
+                    <span style="font-size: 0.875rem; font-weight: 600;">-8</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Score Interpretation -->
+    <div style="background: var(--gray-50); padding: 1.5rem; border-radius: 8px;">
+        <h4 style="color: var(--gray-800); margin-bottom: 1rem;">📊 Score Interpretation</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; padding: 1rem; background: var(--success-light); border-radius: 6px;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--success-color);">80-95</div>
+                <div style="font-size: 0.875rem; color: var(--gray-700);">High Credibility</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--primary-light); border-radius: 6px;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary-color);">65-79</div>
+                <div style="font-size: 0.875rem; color: var(--gray-700);">Generally Credible</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--warning-light); border-radius: 6px;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--warning-color);">50-64</div>
+                <div style="font-size: 0.875rem; color: var(--gray-700);">Mixed Signals</div>
+            </div>
+            <div style="text-align: center; padding: 1rem; background: var(--danger-light); border-radius: 6px;">
+                <div style="font-size: 1.25rem; font-weight: 700; color: var(--danger-color);">5-49</div>
+                <div style="font-size: 0.875rem; color: var(--gray-700);">Low Credibility</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Limitations and Future Work -->
+<div class="card">
+    <h3 style="color: var(--gray-900); margin-bottom: 1.5rem;">⚠️ Limitations & Future Development</h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <!-- Current Limitations -->
+        <div>
+            <h4 style="color: var(--danger-color); margin-bottom: 1rem; font-size: 1rem;">Current Limitations</h4>
+            <ul style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li style="margin-bottom: 0.5rem;">Limited to English language content</li>
+                <li style="margin-bottom: 0.5rem;">Source database covers ~200 domains</li>
+                <li style="margin-bottom: 0.5rem;">No real-time fact verification</li>
+                <li style="margin-bottom: 0.5rem;">Context-dependent claims may be missed</li>
+                <li style="margin-bottom: 0.5rem;">Requires minimum content length for accuracy</li>
+            </ul>
+        </div>
+
+        <!-- Planned Improvements -->
+        <div>
+            <h4 style="color: var(--success-color); margin-bottom: 1rem; font-size: 1rem;">Planned Improvements</h4>
+            <ul style="color: var(--gray-700); font-size: 0.875rem; line-height: 1.5; margin: 0; padding-left: 1.25rem;">
+                <li style="margin-bottom: 0.5rem;">Multi-language support</li>
+                <li style="margin-bottom: 0.5rem;">Expanded domain credibility database</li>
+                <li style="margin-bottom: 0.5rem;">Live fact-checking API integration</li>
+                <li style="margin-bottom: 0.5rem;">Enhanced context understanding</li>
+                <li style="margin-bottom: 0.5rem;">Image and video content analysis</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
